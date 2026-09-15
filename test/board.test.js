@@ -99,6 +99,21 @@ test('parseBoard accepts well-formed boards', async (t) => {
       input: `\n\n${SOLVED}\n\n`,
       expectedRow0: [5, 3, 4, 6, 7, 8, 9, 1, 2],
     },
+    {
+      name: 'single-line 81-character format',
+      input: PUZZLE.replace(/\n/g, ''),
+      expectedRow0: [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    },
+    {
+      name: 'single-line format with surrounding whitespace',
+      input: `  ${SOLVED.replace(/\n/g, '')}\n`,
+      expectedRow0: [5, 3, 4, 6, 7, 8, 9, 1, 2],
+    },
+    {
+      name: 'single-line format using zeros for blanks',
+      input: PUZZLE.replace(/\n/g, '').replace(/\./g, '0'),
+      expectedRow0: [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    },
   ];
 
   for (const testCase of cases) {
@@ -151,6 +166,21 @@ test('parseBoard rejects malformed or conflicting boards', async (t) => {
       name: 'a repeated digit in the same box but different row and column',
       input: DUPLICATE_IN_BOX,
       messageIncludes: 'duplicate value 1 in box (1, 1)',
+    },
+    {
+      name: 'a letter in an otherwise well-formed single line',
+      input: `${PUZZLE.replace(/\n/g, '').slice(0, 80)}x`,
+      messageIncludes: 'row 9, column 9: invalid character',
+    },
+    {
+      name: 'a duplicate in the same row of a single line',
+      input: `11${'.'.repeat(79)}`,
+      messageIncludes: 'duplicate value 1 in row 1',
+    },
+    {
+      name: 'a single line that is the wrong length falls back to row parsing',
+      input: PUZZLE.replace(/\n/g, '').slice(0, 80),
+      messageIncludes: 'expected 9 rows, found 1',
     },
   ];
 

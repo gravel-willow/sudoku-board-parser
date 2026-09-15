@@ -44,6 +44,18 @@ trailing blank lines are stripped (so you can paste a puzzle with some
 whitespace around it), but a blank line *inside* the grid is not special -
 it's just a row with zero characters, which is a parse error.
 
+`parseBoard` also accepts the single-line 81-character format used by most
+puzzle archives, where a puzzle is one row per file and rows are read left
+to right:
+
+```
+53..7....6..195....98....6.8...6...34..8.3..17...2...6.6....28....419..5....8..79
+```
+
+Which format is used is detected automatically: if the input, after
+trimming surrounding whitespace, is 81 characters with no line break, it's
+read as a single line; otherwise it's read as nine lines of nine.
+
 ## Usage
 
 ```ts
@@ -112,7 +124,7 @@ conflict shape) without writing a new test function.
 
 ## Status
 
-This is a first cut: parsing, validation, and printing work and are
-tested. See the project's issue tracker or commit history for what's
-planned next (a solver, the single-line 81-character puzzle format, and
-so on).
+This is a first cut: parsing (both the nine-line and single-line 81-
+character formats), validation, and printing work and are tested. See the
+project's issue tracker or commit history for what's planned next (a
+solver and so on).

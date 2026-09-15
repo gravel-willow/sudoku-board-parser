@@ -14,17 +14,27 @@ export class SudokuParseError extends Error {
 }
 
 /**
- * Parses a 9x9 sudoku board from plain text: nine lines of nine characters
- * each, using '1'-'9' for filled cells and '.' or '0' for blanks. Leading
- * and trailing blank lines are ignored so a puzzle can be pasted with
- * surrounding whitespace, but a blank line inside the grid is not - it just
- * counts as a too-short row, same as any other malformed line.
+ * Parses a 9x9 sudoku board from plain text. Two formats are accepted:
+ *
+ * - nine lines of nine characters each, using '1'-'9' for filled cells and
+ *   '.' or '0' for blanks. Leading and trailing blank lines are ignored so
+ *   a puzzle can be pasted with surrounding whitespace, but a blank line
+ *   inside the grid is not - it just counts as a too-short row, same as
+ *   any other malformed line.
+ * - a single line of 81 characters, using the same character rules, read
+ *   left to right and wrapped into rows of nine. This is the format most
+ *   puzzle archives use for one-line-per-puzzle files.
  *
  * Beyond shape and character checks, this also rejects boards that already
  * break sudoku's rules: two of the same digit in a row, column, or 3x3 box.
  * It does not require the board to be solved or even solvable.
  */
 export function parseBoard(input: string): Board {
+  const trimmed = input.trim();
+  if (trimmed.length === SIZE * SIZE && !trimmed.includes('\n')) {
+    return parseSingleLine(trimmed);
+  }
+
   const lines = input.split(/\r\n|\n/);
   while (lines.length > 0 && lines[0].trim() === '') lines.shift();
   while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
@@ -43,22 +53,35 @@ export function parseBoard(input: string): Board {
     }
     const row: Cell[] = [];
     for (let c = 0; c < SIZE; c++) {
-      const ch = line[c];
-      if (ch === '.' || ch === '0') {
-        row.push(0);
-      } else if (ch >= '1' && ch <= '9') {
-        row.push(ch.charCodeAt(0) - '0'.charCodeAt(0));
-      } else {
-        throw new SudokuParseError(
-          `row ${r + 1}, column ${c + 1}: invalid character ${JSON.stringify(ch)}`
-        );
-      }
+      row.push(parseCell(line[c], r, c));
     }
     board.push(row);
   }
 
   checkForConflicts(board);
   return board;
+}
+
+function parseSingleLine(text: string): Board {
+  const board: Board = [];
+  for (let r = 0; r < SIZE; r++) {
+    const row: Cell[] = [];
+    for (let c = 0; c < SIZE; c++) {
+      row.push(parseCell(text[r * SIZE + c], r, c));
+    }
+    board.push(row);
+  }
+
+  checkForConflicts(board);
+  return board;
+}
+
+function parseCell(ch: string, r: number, c: number): Cell {
+  if (ch === '.' || ch === '0') return 0;
+  if (ch >= '1' && ch <= '9') return ch.charCodeAt(0) - '0'.charCodeAt(0);
+  throw new SudokuParseError(
+    `row ${r + 1}, column ${c + 1}: invalid character ${JSON.stringify(ch)}`
+  );
 }
 
 function checkForConflicts(board: Board): void {
