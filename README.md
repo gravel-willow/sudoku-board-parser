@@ -106,6 +106,25 @@ A `Board` is just `number[][]`, 9 rows of 9 cells, where `0` means blank.
 There's no special type wrapper - it's meant to be easy to pass into
 whatever you write next (a solver, a difficulty scorer, a renderer).
 
+## Solving
+
+```ts
+import { solveBoard } from './src/solve';
+
+const solution = solveBoard(board);
+if (solution) {
+  console.log(printBoard(solution));
+} else {
+  console.log('no solution');
+}
+```
+
+`solveBoard` fills in the blanks with plain backtracking and returns a new
+board, leaving the one you passed in untouched. It returns `null` if the
+board has no solution. It doesn't check for more than one solution - a
+puzzle with several valid completions just gets the first one backtracking
+finds. Uniqueness checking is a separate problem, left for later.
+
 ## Building and testing
 
 This is a zero-dependency project - no packages to install. It compiles
@@ -125,6 +144,7 @@ conflict shape) without writing a new test function.
 ## Status
 
 This is a first cut: parsing (both the nine-line and single-line 81-
-character formats), validation, and printing work and are tested. See the
-project's issue tracker or commit history for what's planned next (a
-solver and so on).
+character formats), validation, printing, and a backtracking solver all
+work and are tested. See the project's issue tracker or commit history for
+what's planned next - a uniqueness check, a CLI, and a difficulty scoring
+heuristic.
