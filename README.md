@@ -123,7 +123,24 @@ if (solution) {
 board, leaving the one you passed in untouched. It returns `null` if the
 board has no solution. It doesn't check for more than one solution - a
 puzzle with several valid completions just gets the first one backtracking
-finds. Uniqueness checking is a separate problem, left for later.
+finds.
+
+For that, there's `hasUniqueSolution`:
+
+```ts
+import { hasUniqueSolution, countSolutions } from './src/solve';
+
+if (!hasUniqueSolution(board)) {
+  console.log('not a well-posed puzzle');
+}
+```
+
+`hasUniqueSolution` returns `false` for both "no solution" and "more than
+one solution" - it answers "is this puzzle sound", not "is this puzzle
+solvable". It's built on `countSolutions(board, limit = 2)`, which counts
+distinct solutions but stops searching as soon as it hits `limit`, so
+checking uniqueness doesn't cost anywhere near what enumerating every
+solution to a wide-open board would.
 
 ## Building and testing
 
@@ -144,7 +161,7 @@ conflict shape) without writing a new test function.
 ## Status
 
 This is a first cut: parsing (both the nine-line and single-line 81-
-character formats), validation, printing, and a backtracking solver all
-work and are tested. See the project's issue tracker or commit history for
-what's planned next - a uniqueness check, a CLI, and a difficulty scoring
-heuristic.
+character formats), validation, printing, a backtracking solver, and a
+uniqueness check all work and are tested. See the project's issue tracker
+or commit history for what's planned next - a CLI, and a difficulty
+scoring heuristic.

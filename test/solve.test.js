@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { parseBoard } = require('../dist/board');
-const { solveBoard } = require('../dist/solve');
+const { solveBoard, countSolutions, hasUniqueSolution } = require('../dist/solve');
 
 const BLANK_ROW = '.'.repeat(9);
 const EMPTY_BOARD = Array(9).fill(BLANK_ROW).join('\n');
@@ -105,4 +105,45 @@ test('solveBoard finds a solution for a fully empty board', () => {
 test('solveBoard returns null for a board with no solution', () => {
   const given = parseBoard(UNSOLVABLE);
   assert.equal(solveBoard(given), null);
+});
+
+test('countSolutions counts exactly one solution for a well-posed puzzle', () => {
+  const given = parseBoard(PUZZLE);
+  assert.equal(countSolutions(given), 1);
+  // A limit smaller than the true count still finds the single solution.
+  assert.equal(countSolutions(given, 1), 1);
+});
+
+test('countSolutions returns 0 for a board with no solution', () => {
+  const given = parseBoard(UNSOLVABLE);
+  assert.equal(countSolutions(given), 0);
+});
+
+test('countSolutions stops at the limit instead of enumerating every solution', () => {
+  const given = parseBoard(EMPTY_BOARD);
+  assert.equal(countSolutions(given, 1), 1);
+  assert.equal(countSolutions(given, 2), 2);
+});
+
+test('countSolutions does not modify the board it was given', () => {
+  const given = parseBoard(PUZZLE);
+  const copy = given.map((row) => row.slice());
+  countSolutions(given);
+  assert.deepEqual(given, copy);
+});
+
+test('hasUniqueSolution is true for a well-posed puzzle', () => {
+  assert.equal(hasUniqueSolution(parseBoard(PUZZLE)), true);
+});
+
+test('hasUniqueSolution is true for an already-solved board', () => {
+  assert.equal(hasUniqueSolution(parseBoard(SOLVED)), true);
+});
+
+test('hasUniqueSolution is false for a board with no solution', () => {
+  assert.equal(hasUniqueSolution(parseBoard(UNSOLVABLE)), false);
+});
+
+test('hasUniqueSolution is false for a wide-open board with many solutions', () => {
+  assert.equal(hasUniqueSolution(parseBoard(EMPTY_BOARD)), false);
 });

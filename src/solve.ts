@@ -30,6 +30,46 @@ function solve(board: Board): boolean {
   return false;
 }
 
+/**
+ * Counts how many distinct solutions a board has, stopping as soon as
+ * `limit` is reached. A puzzle can be underconstrained enough to have
+ * thousands of solutions, and we usually only care whether there's zero,
+ * one, or "more than one" - so the default limit is 2 and the search never
+ * does more work than that requires.
+ */
+export function countSolutions(board: Board, limit = 2): number {
+  const working = board.map((row) => row.slice());
+  let count = 0;
+  countFrom(working);
+  return count;
+
+  function countFrom(current: Board): void {
+    const cell = findBlankCell(current);
+    if (!cell) {
+      count++;
+      return;
+    }
+    const [r, c] = cell;
+
+    for (let value = 1; value <= SIZE && count < limit; value++) {
+      if (canPlace(current, r, c, value)) {
+        current[r][c] = value;
+        countFrom(current);
+        current[r][c] = 0;
+      }
+    }
+  }
+}
+
+/**
+ * True if the board has exactly one solution. A board with no solution or
+ * with several both return false - this answers "is this puzzle sound",
+ * not "is this puzzle solvable".
+ */
+export function hasUniqueSolution(board: Board): boolean {
+  return countSolutions(board, 2) === 1;
+}
+
 function findBlankCell(board: Board): [number, number] | null {
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
