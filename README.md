@@ -142,6 +142,23 @@ distinct solutions but stops searching as soon as it hits `limit`, so
 checking uniqueness doesn't cost anywhere near what enumerating every
 solution to a wide-open board would.
 
+## Command line
+
+After `npm run build`, `node dist/cli.js` reads puzzles from files (or from
+stdin if there are none, or for a file named `-`):
+
+```
+node dist/cli.js puzzle.txt            # pretty-print
+node dist/cli.js --solve puzzle.txt    # print the solution
+node dist/cli.js --check a.txt b.txt   # no, one, or multiple solutions
+```
+
+A file where every non-blank line is 81 characters is read as one puzzle
+per line, and the output is labelled `file:line`. Puzzles that fail to
+parse, or that have no solution under `--solve`, are reported on stderr and
+the exit code is 1; the remaining puzzles are still processed. Bad options
+exit with 2.
+
 ## Building and testing
 
 This is a zero-dependency project - no packages to install. It compiles
@@ -152,8 +169,9 @@ npm run build
 npm test
 ```
 
-`npm test` runs the build first, then executes `test/board.test.js`
-against the compiled output in `dist/`. The suite is table-driven: each
+`npm test` runs the build first, then executes the files in `test/`
+against the compiled output in `dist/`. `src/node.d.ts` declares the few
+Node APIs the CLI uses, since `@types/node` isn't installed. The suite is table-driven: each
 test is a list of `{ name, input, expected }` entries, which makes it
 cheap to add the next awkward case (a new malformed input, a new
 conflict shape) without writing a new test function.
@@ -162,6 +180,5 @@ conflict shape) without writing a new test function.
 
 This is a first cut: parsing (both the nine-line and single-line 81-
 character formats), validation, printing, a backtracking solver, and a
-uniqueness check all work and are tested. See the project's issue tracker
-or commit history for what's planned next - a CLI, and a difficulty
-scoring heuristic.
+uniqueness check, and a small CLI all work and are tested. Next up is a
+difficulty scoring heuristic.
